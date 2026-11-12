@@ -82,7 +82,7 @@ export default function App() {
     }
   };
 
-  // Open Envelope Animation & Start Audio
+  // Open Envelope Animation (Song remains off by default)
   const handleOpenEnvelope = () => {
     setIsOpeningAnim(true);
 
@@ -93,15 +93,6 @@ export default function App() {
       origin: { y: 0.6 },
       colors: ['#faebb9', '#d4a34b', '#1e5245', '#ffffff', '#e2b96d']
     });
-
-    // Attempt audio play immediately on user gesture
-    if (audioRef.current) {
-      audioRef.current.play().then(() => {
-        setIsAudioPlaying(true);
-      }).catch((e) => {
-        console.log('Audio autoplay prevented:', e);
-      });
-    }
 
     setTimeout(() => {
       setIsEnvelopeOpen(true);
@@ -322,7 +313,7 @@ export default function App() {
               className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-[#d4a34b] via-[#faebb9] to-[#d4a34b] text-[#091f1a] font-bold text-xs uppercase tracking-[0.2em] shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
             >
               <Mail className="w-4 h-4 text-[#091f1a] group-hover:rotate-12 transition-transform" />
-              <span>{lang === 'en' ? 'Open Invitation & Play Nasheed' : 'ക്ഷണക്കത്ത് തുറക്കുക'}</span>
+              <span>{lang === 'en' ? 'Open Invitation' : 'ക്ഷണക്കത്ത് തുറക്കുക'}</span>
               <Sparkles className="w-4 h-4 text-[#091f1a]" />
             </button>
 
