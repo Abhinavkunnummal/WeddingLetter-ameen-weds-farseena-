@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #d4a34b;
+  --gold-rich: #e6be6d;
+  --gold-dark: #91681f;
+  --paper: #fbf7ef;
+  --emerald-deep: #091f1a;
+  --emerald: #10342b;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #091f1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5973e;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e6be6d;
+}
+
+/* Gold foil text shimmer */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #faebb9 0%, #e2b96d 40%, #a87928 75%, #fbe9bd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gold-light {
+  background: linear-gradient(180deg, #fff7de 0%, #edd39a 50%, #cfa453 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Ornate Border Arch */
+.ornate-arch {
+  border: 1.5px solid rgba(212, 163, 75, 0.7);
+  border-radius: 999px 999px 12px 12px;
+  position: relative;
+}
+
+.ornate-arch::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(212, 163, 75, 0.35);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Islamic Arch for Cards */
+.card-arch {
+  border-radius: 120px 120px 18px 18px;
+  position: relative;
+}
+
+.card-arch::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: inherit;
+  border: 1px dashed rgba(212, 163, 75, 0.35);
+  pointer-events: none;
+}
+
+/* Diamond motif */
+.diamond-dot {
+  width: 8px;
+  height: 8px;
+  background: #d4a34b;
+  transform: rotate(45deg);
+  display: inline-block;
+}
+
+/* Gold glow effect */
+.gold-glow {
+  box-shadow: 0 0 25px -4px rgba(212, 163, 75, 0.35);
+}
+
+.gold-glow-lg {
+  box-shadow: 0 10px 40px -10px rgba(212, 163, 75, 0.45);
+}
+
+/* Pulse keyframes */
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 163, 75, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(212, 163, 75, 0);
+  }
+}
+
+.pulse-gold {
+  animation: goldPulse 2.5s infinite;
+}
