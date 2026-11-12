@@ -169,7 +169,7 @@ export default function App() {
     const icsData = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//Muhammed Ameen and Farseena Wedding//EN',
+      'PRODID:-//Mohamed Ameen and Farseena Wedding//EN',
       'CALSCALE:GREGORIAN',
       'METHOD:PUBLISH',
       'BEGIN:VEVENT',
@@ -177,8 +177,8 @@ export default function App() {
       'DTSTAMP:20261112T120000Z',
       'DTSTART:20261223T133000Z',
       'DTEND:20261223T163000Z',
-      'SUMMARY:Nikkah: Muhammed Ameen & Farseena',
-      'DESCRIPTION:With the blessings of Allah, joining in marriage. Groom: Muhammed Ameen, Bride: Farseena.',
+      'SUMMARY:Nikkah: Mohamed Ameen & Farseena',
+      'DESCRIPTION:With the blessings of Allah, joining in marriage. Groom: Mohamed Ameen, Bride: Farseena.',
       'LOCATION:Dawa Community Hall, Kanjiramukku, Maranchery, Kerala',
       'STATUS:CONFIRMED',
       'END:VEVENT',
@@ -187,8 +187,8 @@ export default function App() {
       'DTSTAMP:20261112T120000Z',
       'DTSTART:20261224T053000Z',
       'DTEND:20261224T103000Z',
-      'SUMMARY:Wedding Reception: Muhammed Ameen & Farseena',
-      'DESCRIPTION:Grand Wedding Reception of Muhammed Ameen & Farseena.',
+      'SUMMARY:Wedding Reception: Mohamed Ameen & Farseena',
+      'DESCRIPTION:Grand Wedding Reception of Mohamed Ameen & Farseena.',
       'LOCATION:Beevus Hall, Purangu, Maranchery, Kerala',
       'STATUS:CONFIRMED',
       'END:VEVENT',
@@ -207,9 +207,9 @@ export default function App() {
 
   // Share invitation
   const shareDetails = () => {
-    const title = '💍 Muhammed Ameen weds Farseena — Wedding Invitation';
+    const title = '💍 Mohamed Ameen weds Farseena — Wedding Invitation';
     const text = lang === 'en'
-      ? `💍 Two hearts, one beautiful journey! ❤️\n\nWith immense joy and love, you are cordially invited to celebrate the marriage of Muhammed Ameen & Farseena.\n\n✨ Nikkah: Wednesday, Dec 23, 2026 at 7:00 PM (Dawa Community Hall, Kanjiramukku)\n🎉 Wedding Day: Thursday, Dec 24, 2026 (Beevus Hall, Purangu, Maranchery)\n\nTap to view the digital invitation:`
+      ? `💍 Two hearts, one beautiful journey! ❤️\n\nWith immense joy and love, you are cordially invited to celebrate the marriage of Mohamed Ameen & Farseena.\n\n✨ Nikkah: Wednesday, Dec 23, 2026 at 7:00 PM (Dawa Community Hall, Kanjiramukku)\n🎉 Wedding Day: Thursday, Dec 24, 2026 (Beevus Hall, Purangu, Maranchery)\n\nTap to view the digital invitation:`
       : `💍 അല്ലാഹുവിന്റെ അനുഗ്രഹത്താൽ ഞങ്ങളുടെ മകൻ മുഹമ്മദ് അമീനും ഫർസീനയും വിവാഹിതരാവുകയാണ്.\n\n✨ നിക്കാഹ്: 2026 ഡിസംബർ 23 ബുധൻ വൈകീട്ട് 7:00 മണിക്ക് (ദഅ്‌വാ കമ്യൂണിറ്റി ഹാൾ, കാഞ്ഞിരമുക്ക്)\n🎉 വിവാഹ സുദിനം: 2026 ഡിസംബർ 24 വ്യാഴം (ബീവൂസ് ഹാൾ, പുറങ്ങ്, മാറഞ്ചേരി)\n\nതാങ്കളുടെ കുടുംബസമേതമുള്ള സാന്നിധ്യം സാദരം ക്ഷണിക്കുന്നു.\nവിവാഹ ക്ഷണക്കത്ത് കാണാൻ ഈ ലിങ്കിൽ ക്ലിക്ക് ചെയ്യുക:`;
 
     const url = window.location.href;
@@ -225,7 +225,7 @@ export default function App() {
 
   const openWhatsApp = () => {
     const text = encodeURIComponent(
-      `💍 Two hearts, one beautiful journey! ❤️\n\nWith immense joy, we invite you to be part of the wedding celebration of *Muhammed Ameen & Farseena*.\n\n📅 *Nikkah:* Wednesday, Dec 23, 2026 - 7:00 PM\n📍 *Venue:* Dawa Community Hall, Kanjiramukku\n\n📅 *Wedding Day:* Thursday, Dec 24, 2026\n📍 *Venue:* Beevus Hall, Purangu, Maranchery\n\n✨ View our digital wedding invitation:\n${window.location.href}`
+      `💍 Two hearts, one beautiful journey! ❤️\n\nWith immense joy, we invite you to be part of the wedding celebration of *Mohamed Ameen & Farseena*.\n\n📅 *Nikkah:* Wednesday, Dec 23, 2026 - 7:00 PM\n📍 *Venue:* Dawa Community Hall, Kanjiramukku\n\n📅 *Wedding Day:* Thursday, Dec 24, 2026\n📍 *Venue:* Beevus Hall, Purangu, Maranchery\n\n✨ View our digital wedding invitation:\n${window.location.href}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
@@ -300,7 +300,7 @@ export default function App() {
                 {lang === 'en' ? 'Wedding Invitation' : 'വിവാഹ ക്ഷണക്കത്ത്'}
               </div>
               <h1 className="font-serif text-2xl sm:text-3xl font-bold text-gold-light tracking-tight">
-                {lang === 'en' ? 'Muhammed Ameen & Farseena' : 'മുഹമ്മദ് അമീൻ & ഫർസീന'}
+                {lang === 'en' ? 'Mohamed Ameen & Farseena' : 'മുഹമ്മദ് അമീൻ & ഫർസീന'}
               </h1>
               <div className="text-[11px] text-[#faebb9]/80 uppercase tracking-widest pt-1">
                 23 & 24 December 2026 · Maranchery
@@ -474,7 +474,7 @@ export default function App() {
             {/* Couple Names */}
             <div className="my-2 space-y-1">
               <h1 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-semibold text-gold-light tracking-tight">
-                {lang === 'en' ? 'Muhammed Ameen' : 'മുഹമ്മദ് അമീൻ'}
+                {lang === 'en' ? 'Mohamed Ameen' : 'മുഹമ്മദ് അമീൻ'}
               </h1>
               <div className="flex items-center justify-center gap-3 my-1">
                 <span className="h-[1px] w-10 bg-gradient-to-r from-transparent to-[#d4a34b]" />
@@ -552,7 +552,7 @@ export default function App() {
               A
             </div>
             <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#0e2b24] mb-1">
-              {lang === 'en' ? 'Muhammed Ameen' : 'മുഹമ്മദ് അമീൻ'}
+              {lang === 'en' ? 'Mohamed Ameen' : 'മുഹമ്മദ് അമീൻ'}
             </h3>
             
             {/* Groom's Parents */}
@@ -566,7 +566,7 @@ export default function App() {
               <span>
                 {lang === 'en' ? (
                   <>
-                    Kaliyarakath Manatha Parambil<br />
+                    Kaliyarakath Manath Parambil<br />
                     M.G. Road Nalakam, Maranchery
                   </>
                 ) : (
@@ -1018,7 +1018,7 @@ export default function App() {
             </div>
             <div>
               {lang === 'en' ? (
-                <>Kaliyarakath Manatha Parambil, M.G. Road Nalakam, Maranchery</>
+                <>Kaliyarakath Manath Parambil, M.G. Road Nalakam, Maranchery</>
               ) : (
                 <>കാളിയാരകത്ത് മാനാത്ത പറമ്പിൽ, MG റോഡ് നാലകം, മാറഞ്ചേരി</>
               )}
@@ -1145,7 +1145,7 @@ export default function App() {
 
           {/* Footer note */}
           <div className="mt-8 text-[11px] tracking-[0.25em] uppercase text-[#7d6a52]">
-            Muhammed Ameen &amp; Farseena<br />
+            Mohamed Ameen &amp; Farseena<br />
             23 · 24 · December · 2026
           </div>
         </section>
@@ -1184,7 +1184,7 @@ export default function App() {
 
             <div className="mt-3 text-[11px] text-[#faebb9]/80 text-center">
               {lang === 'en'
-                ? 'High-resolution invitation card of Muhammed Ameen & Farseena'
+                ? 'High-resolution invitation card of Mohamed Ameen & Farseena'
                 : 'മുഹമ്മദ് അമീൻ & ഫർസീന വിവാഹ ക്ഷണക്കത്ത്'}
             </div>
           </div>
