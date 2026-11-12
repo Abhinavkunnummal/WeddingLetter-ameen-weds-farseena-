@@ -11,7 +11,6 @@ import {
   Volume2,
   VolumeX,
   Sparkles,
-  ExternalLink,
   Copy,
   Check,
   X,
@@ -19,23 +18,35 @@ import {
   Navigation,
   Globe,
   Camera,
-  Gift
+  Mail,
+  Send,
+  Star,
+  RotateCcw
 } from 'lucide-react';
 
 export default function App() {
-  const [lang, setLang] = useState('en'); // 'en' or 'ml'
+  // State
+  const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
+  const [isOpeningAnim, setIsOpeningAnim] = useState(false);
+  const [lang, setLang] = useState('en'); // 'en' | 'ml'
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [activeVenueTab, setActiveVenueTab] = useState('nikkah'); // 'nikkah' or 'reception'
+  const [activeVenueTab, setActiveVenueTab] = useState('nikkah'); // 'nikkah' | 'reception'
   const [copiedAddress, setCopiedAddress] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [blessingCount, setBlessingCount] = useState(148);
+  const [hasBlessed, setHasBlessed] = useState(false);
+  const [userDua, setUserDua] = useState('');
+  const [submittedDuas, setSubmittedDuas] = useState([
+    { name: 'Family & Friends', text: 'May Allah bless your marriage with endless happiness, love and barakah! Ameen 🤲', time: 'Just now' },
+    { name: 'നാട്ടുകാർ & ബന്ധുക്കൾ', text: 'അല്ലാഹു നിങ്ങളുടെ ദാമ്പത്യ ജീവിതം സമാധാനവും സന്തോഷവും നിറഞ്ഞതാക്കട്ടെ.', time: '5m ago' }
+  ]);
 
-  // Audio Context Ref
-  const audioCtxRef = useRef(null);
-  const audioIntervalRef = useRef(null);
+  // Audio Ref (Baraka Allahu Lakuma Nasheed)
+  const audioRef = useRef(null);
 
-  // Scroll indicator & rings animation
+  // Scroll indicator
   useEffect(() => {
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -54,72 +65,55 @@ export default function App() {
     setTimeout(() => setToastMsg(''), 3000);
   };
 
-  // Web Audio Synthesizer for gentle oriental bamboo flute & warm acoustic drone
+  // Play / Pause Nasheed
   const toggleAudio = () => {
+    if (!audioRef.current) return;
     if (isAudioPlaying) {
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close();
-        audioCtxRef.current = null;
-      }
-      if (audioIntervalRef.current) {
-        clearInterval(audioIntervalRef.current);
-        audioIntervalRef.current = null;
-      }
+      audioRef.current.pause();
       setIsAudioPlaying(false);
-      showToast(lang === 'en' ? 'Music paused' : 'സംഗീതം താല്ക്കാലികമായി നിർത്തി');
+      showToast(lang === 'en' ? 'Nasheed paused' : 'നഷീദ് താൽക്കാലികമായി നിർത്തി');
     } else {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioCtx();
-        audioCtxRef.current = ctx;
-
-        // Pentatonic peaceful notes: C#4, D#4, F#4, G#4, A#4, C#5
-        const notes = [277.18, 311.13, 369.99, 415.3, 466.16, 554.37];
-        
-        // Gentle warm master drone
-        const droneOsc = ctx.createOscillator();
-        const droneGain = ctx.createGain();
-        droneOsc.type = 'sine';
-        droneOsc.frequency.setValueAtTime(138.59, ctx.currentTime); // C#3
-        droneGain.gain.setValueAtTime(0.04, ctx.currentTime);
-        droneOsc.connect(droneGain);
-        droneGain.connect(ctx.destination);
-        droneOsc.start();
-
-        const playRandomChime = () => {
-          if (!audioCtxRef.current) return;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const filter = ctx.createBiquadFilter();
-
-          const freq = notes[Math.floor(Math.random() * notes.length)];
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(900, ctx.currentTime);
-
-          const now = ctx.currentTime;
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.04, now + 0.6);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
-
-          osc.connect(filter);
-          filter.connect(gain);
-          gain.connect(ctx.destination);
-
-          osc.start(now);
-          osc.stop(now + 3.3);
-        };
-
-        playRandomChime();
-        audioIntervalRef.current = setInterval(playRandomChime, 2200);
+      audioRef.current.play().then(() => {
         setIsAudioPlaying(true);
-        showToast(lang === 'en' ? 'Playing calming wedding melody' : 'മംഗള ഗാനം പ്ലേ ചെയ്യുന്നു');
-      } catch (e) {
-        console.error('Audio error:', e);
-      }
+        showToast(lang === 'en' ? 'Playing: Baraka Allahu Lakuma 🎵' : 'ഗാനം പ്ലേ ചെയ്യുന്നു: ബാരകല്ലാഹു ലക്കുമ 🎵');
+      }).catch((e) => {
+        console.error('Playback error:', e);
+      });
     }
+  };
+
+  // Open Envelope Animation & Start Audio
+  const handleOpenEnvelope = () => {
+    setIsOpeningAnim(true);
+
+    // Confetti burst
+    confetti({
+      particleCount: 90,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#faebb9', '#d4a34b', '#1e5245', '#ffffff', '#e2b96d']
+    });
+
+    // Attempt audio play immediately on user gesture
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsAudioPlaying(true);
+      }).catch((e) => {
+        console.log('Audio autoplay prevented:', e);
+      });
+    }
+
+    setTimeout(() => {
+      setIsEnvelopeOpen(true);
+      setIsOpeningAnim(false);
+      showToast(lang === 'en' ? 'Welcome to our celebration! 💍' : 'ഞങ്ങളുടെ വിവാഹത്തിലേക്ക് ഹൃദ്യമായ സ്വാഗതം! 💍');
+    }, 700);
+  };
+
+  // Re-close envelope
+  const handleResetEnvelope = () => {
+    setIsEnvelopeOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Countdown timer to Nikkah (Dec 23, 2026, 19:00 IST)
@@ -147,15 +141,28 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Confetti trigger
-  const triggerConfetti = () => {
+  // Send Blessing Button
+  const handleSendBlessing = (customText = null) => {
+    setBlessingCount((prev) => prev + 1);
+    setHasBlessed(true);
+
     confetti({
-      particleCount: 75,
-      spread: 70,
-      origin: { y: 0.7 },
-      colors: ['#faebb9', '#d4a34b', '#1e5245', '#f8d288', '#ffffff'],
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.8 },
+      colors: ['#faebb9', '#d4a34b', '#ff4d6d', '#ffffff']
     });
-    showToast(lang === 'en' ? 'May Allah bless this union! ❤️' : 'അല്ലാഹു അവരുടെ ദാമ്പത്യം അനുഗ്രഹിക്കട്ടെ! ❤️');
+
+    const blessingMsg = customText || (lang === 'en' ? 'Barakallahu Lakuma wa Baraka Alaykuma! 🤲' : 'അല്ലാഹു അനുഗ്രഹിക്കട്ടെ! ആമീൻ 🤲');
+    showToast(blessingMsg);
+
+    if (customText) {
+      setSubmittedDuas((prev) => [
+        { name: lang === 'en' ? 'Well-Wisher' : 'സ്നേഹിതൻ', text: customText, time: 'Just now' },
+        ...prev
+      ]);
+      setUserDua('');
+    }
   };
 
   // Copy address
@@ -207,7 +214,7 @@ export default function App() {
     showToast(lang === 'en' ? 'Event added to calendar (.ics)' : 'കലണ്ടർ ഫയൽ ഡൗൺലോഡ് ചെയ്തു');
   };
 
-  // Share text
+  // Share invitation
   const shareDetails = () => {
     const title = '💍 Muhammed Ameen weds Farseena — Wedding Invitation';
     const text = lang === 'en'
@@ -227,72 +234,186 @@ export default function App() {
 
   const openWhatsApp = () => {
     const text = encodeURIComponent(
-      `💍 Two hearts, one beautiful journey! ❤️\n\nWith immense joy, we invite you to be part of the wedding celebration of *Muhammed Ameen & Farseena*.\n\n📅 *Nikkah:* Wednesday, Dec 23, 2026 - 7:00 PM\n📍 *Venue:* Dawa Community Hall, Kanjiramukku\n\n📅 *Wedding:* Thursday, Dec 24, 2026\n📍 *Venue:* Beevus Hall, Purangu, Maranchery\n\n✨ View our digital wedding invitation:\n${window.location.href}`
+      `💍 Two hearts, one beautiful journey! ❤️\n\nWith immense joy, we invite you to be part of the wedding celebration of *Muhammed Ameen & Farseena*.\n\n📅 *Nikkah:* Wednesday, Dec 23, 2026 - 7:00 PM\n📍 *Venue:* Dawa Community Hall, Kanjiramukku\n\n📅 *Wedding Day:* Thursday, Dec 24, 2026\n📍 *Venue:* Beevus Hall, Purangu, Maranchery\n\n✨ View our digital wedding invitation:\n${window.location.href}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
-  // Google Maps links
+  // Google Maps URLs
   const beevusMapUrl = 'https://www.google.com/maps/search/?api=1&query=Beevus+Purangu+Maranchery+Kerala';
   const dawaMapUrl = 'https://www.google.com/maps/search/?api=1&query=Dawa+Community+Hall+Kanjiramukku+Maranchery+Kerala';
 
   return (
-    <div className="min-h-screen bg-[#c8d4cc] font-sans relative selection:bg-[#d4a34b] selection:text-[#0a201a]">
+    <div className="min-h-screen bg-[#c2ceca] font-sans relative selection:bg-[#d4a34b] selection:text-[#0a201a]">
+      {/* Hidden Audio Element for Islamic Nasheed */}
+      <audio ref={audioRef} src="/nasheed.mp3" loop preload="auto" />
+
       {/* Top Reading Progress Bar */}
-      <div
-        className="fixed top-0 left-0 h-1 bg-gradient-to-r from-[#d4a34b] via-[#faebb9] to-[#d4a34b] z-50 transition-all duration-150"
-        style={{ width: `${scrollProgress * 100}%` }}
-      />
+      {isEnvelopeOpen && (
+        <div
+          className="fixed top-0 left-0 h-1 bg-gradient-to-r from-[#d4a34b] via-[#faebb9] to-[#d4a34b] z-50 transition-all duration-150"
+          style={{ width: `${scrollProgress * 100}%` }}
+        />
+      )}
 
-      {/* Floating Action Controls (Top Header) */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-[540px] flex items-center justify-between px-4 py-2.5 rounded-full bg-[#091f1a]/85 backdrop-blur-md border border-[#d4a34b]/40 shadow-xl shadow-black/20 text-[#fbf7ef]">
-        {/* Monogram / Home */}
-        <a href="#hero" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-full border border-[#d4a34b] flex items-center justify-center font-script text-[#faebb9] text-xl pt-1 group-hover:scale-105 transition-transform">
-            A&F
-          </div>
-          <span className="text-xs uppercase tracking-widest font-semibold text-[#e6be6d] hidden sm:inline">
-            Ameen & Farseena
-          </span>
-        </a>
+      {/* =========================================================================
+          FIRST-TIME OPENING INTERACTIVE ENVELOPE OVERLAY
+         ========================================================================= */}
+      {!isEnvelopeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#071915]/95 backdrop-blur-md overflow-hidden">
+          {/* Subtle Islamic geometric starfield */}
+          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#faebb9_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 
-        {/* Action Buttons: Language toggle & Music */}
-        <div className="flex items-center gap-2">
-          {/* Language Switcher */}
-          <button
-            onClick={() => {
-              setLang(lang === 'en' ? 'ml' : 'en');
-              showToast(lang === 'en' ? 'മലയാളത്തിലേക്ക് മാറ്റി' : 'Switched to English');
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#143c32] hover:bg-[#1e5245] border border-[#d4a34b]/50 text-xs font-medium text-[#faebb9] transition-all hover:scale-105"
-            title="Toggle English / Malayalam"
-          >
-            <Globe className="w-3.5 h-3.5 text-[#d4a34b]" />
-            <span>{lang === 'en' ? 'മലയാളം' : 'English'}</span>
-          </button>
-
-          {/* Audio Player Toggle */}
-          <button
-            onClick={toggleAudio}
-            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all hover:scale-105 ${
-              isAudioPlaying
-                ? 'bg-[#d4a34b] text-[#091f1a] border-[#faebb9] shadow-[0_0_12px_rgba(212,163,75,0.6)]'
-                : 'bg-[#143c32] text-[#e6be6d] border-[#d4a34b]/40'
+          {/* Luxury Envelope Container */}
+          <div
+            className={`relative w-full max-w-[460px] bg-gradient-to-b from-[#0e2b24] via-[#12362e] to-[#091f1a] rounded-3xl border-2 border-[#d4a34b] p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] text-center text-[#f4ead6] transition-all duration-700 ${
+              isOpeningAnim ? 'scale-105 opacity-0 -translate-y-6 rotate-1' : 'scale-100 opacity-100 translate-y-0'
             }`}
-            title={isAudioPlaying ? 'Mute Music' : 'Play Wedding Melody'}
           >
-            {isAudioPlaying ? <Volume2 className="w-4 h-4 animate-pulse" /> : <VolumeX className="w-4 h-4" />}
-          </button>
-        </div>
-      </nav>
+            {/* Top Envelope Flap Triangle Graphic */}
+            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-48 h-6 bg-[#d4a34b]/20 rounded-b-full border-b border-[#d4a34b]/50" />
 
-      {/* Main Container - Mobile Centric Luxury Wedding Card Layout */}
+            {/* Bismillah Header */}
+            <div className="font-arabic text-xl sm:text-2xl text-[#faebb9] mb-1" dir="rtl">
+              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[#d4a34b] font-semibold mb-6">
+              Assalamu Alaikum
+            </div>
+
+            {/* Glowing Royal Gold Wax Seal */}
+            <div className="relative my-4 flex items-center justify-center">
+              <button
+                onClick={handleOpenEnvelope}
+                className="group relative w-32 h-32 rounded-full bg-gradient-to-tr from-[#9d7122] via-[#f7e4b2] to-[#b1812e] p-1.5 shadow-[0_0_35px_rgba(212,163,75,0.6)] hover:shadow-[0_0_50px_rgba(250,235,185,0.9)] hover:scale-105 transition-all duration-300"
+              >
+                {/* Inner Wax Ring */}
+                <div className="w-full h-full rounded-full bg-[#0a201a] border-2 border-[#faebb9] flex flex-col items-center justify-center relative overflow-hidden group-hover:bg-[#0e2b24] transition-colors">
+                  <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#faebb9]/10 to-transparent animate-pulse" />
+                  <span className="font-script text-4xl text-gold-gradient leading-none pt-2">
+                    A<i className="font-serif italic text-xl px-0.5 text-[#e6be6d]">&</i>F
+                  </span>
+                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-[#e6be6d] mt-1">
+                    Tap to Open
+                  </span>
+                </div>
+
+                {/* Outer Rotating Sparkle Ring */}
+                <div className="absolute -inset-2 rounded-full border border-dashed border-[#faebb9]/40 animate-spin-slow pointer-events-none" />
+              </button>
+            </div>
+
+            {/* Names & Event Title */}
+            <div className="my-5 space-y-1">
+              <div className="text-xs uppercase tracking-[0.25em] text-[#e6be6d] font-medium">
+                {lang === 'en' ? 'Wedding Invitation' : 'വിവാഹ ക്ഷണക്കത്ത്'}
+              </div>
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-gold-light tracking-tight">
+                {lang === 'en' ? 'Muhammed Ameen & Farseena' : 'മുഹമ്മദ് അമീൻ & ഫർസീന'}
+              </h1>
+              <div className="text-[11px] text-[#faebb9]/80 uppercase tracking-widest pt-1">
+                23 & 24 December 2026 · Maranchery
+              </div>
+            </div>
+
+            {/* Interactive Open Invitation CTA */}
+            <button
+              onClick={handleOpenEnvelope}
+              className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-[#d4a34b] via-[#faebb9] to-[#d4a34b] text-[#091f1a] font-bold text-xs uppercase tracking-[0.2em] shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
+            >
+              <Mail className="w-4 h-4 text-[#091f1a] group-hover:rotate-12 transition-transform" />
+              <span>{lang === 'en' ? 'Open Invitation & Play Nasheed' : 'ക്ഷണക്കത്ത് തുറക്കുക'}</span>
+              <Sparkles className="w-4 h-4 text-[#091f1a]" />
+            </button>
+
+            {/* Language Switcher on Envelope */}
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <button
+                onClick={() => setLang(lang === 'en' ? 'ml' : 'en')}
+                className="inline-flex items-center gap-1.5 text-[11px] text-[#faebb9]/80 hover:text-[#faebb9] underline underline-offset-4"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#d4a34b]" />
+                <span>{lang === 'en' ? 'മലയാളത്തിൽ കാണുക' : 'Switch to English'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Controls (Top Navigation Bar) */}
+      {isEnvelopeOpen && (
+        <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-[540px] flex items-center justify-between px-4 py-2.5 rounded-full bg-[#091f1a]/90 backdrop-blur-md border border-[#d4a34b]/40 shadow-xl shadow-black/25 text-[#fbf7ef]">
+          {/* Monogram / Home */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full border border-[#d4a34b] flex items-center justify-center font-script text-[#faebb9] text-xl pt-1 bg-[#143c32]">
+              A&F
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] uppercase tracking-widest font-bold text-[#e6be6d] leading-none">
+                Ameen & Farseena
+              </span>
+              <span className="text-[8.5px] uppercase tracking-wider text-[#d4a34b]/80">
+                23 & 24 Dec 2026
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons: Language toggle, Music, Envelope reset */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Re-open Envelope */}
+            <button
+              onClick={handleResetEnvelope}
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-[#143c32] hover:bg-[#1e5245] border border-[#d4a34b]/40 text-[#faebb9] transition-all hover:scale-105"
+              title="Close to Envelope View"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-[#d4a34b]" />
+            </button>
+
+            {/* Language Switcher */}
+            <button
+              onClick={() => {
+                setLang(lang === 'en' ? 'ml' : 'en');
+                showToast(lang === 'en' ? 'മലയാളത്തിലേക്ക് മാറ്റി' : 'Switched to English');
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#143c32] hover:bg-[#1e5245] border border-[#d4a34b]/50 text-xs font-semibold text-[#faebb9] transition-all hover:scale-105"
+            >
+              <Globe className="w-3 h-3 text-[#d4a34b]" />
+              <span>{lang === 'en' ? 'മലയാളം' : 'English'}</span>
+            </button>
+
+            {/* Audio Toggle (Baraka Allahu Lakuma) */}
+            <button
+              onClick={toggleAudio}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all hover:scale-105 ${
+                isAudioPlaying
+                  ? 'bg-gradient-to-r from-[#d4a34b] to-[#faebb9] text-[#091f1a] border-[#faebb9] shadow-[0_0_12px_rgba(212,163,75,0.6)]'
+                  : 'bg-[#143c32] text-[#e6be6d] border-[#d4a34b]/40'
+              }`}
+              title={isAudioPlaying ? 'Mute Nasheed' : 'Play Baraka Allahu Lakuma'}
+            >
+              {isAudioPlaying ? (
+                <>
+                  <Volume2 className="w-3.5 h-3.5 animate-pulse" />
+                  <span className="hidden sm:inline text-[10px]">Playing</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline text-[10px]">Music</span>
+                </>
+              )}
+            </button>
+          </div>
+        </nav>
+      )}
+
+      {/* Main Container - Mobile-First Luxury Wedding Card Layout */}
       <main className="max-w-[560px] mx-auto bg-[#fbf7ef] shadow-2xl relative overflow-hidden text-[#3a2818] border-x border-[#c2b29c]/30">
 
         {/* HERO SECTION */}
         <section
           id="hero"
-          className="min-h-[100svh] relative flex flex-col justify-between p-4 sm:p-6 pt-20 pb-10 bg-hero-gradient text-[#f4ead6] overflow-hidden text-center"
+          className="min-h-[100svh] relative flex flex-col justify-between p-4 sm:p-6 pt-24 pb-12 bg-hero-gradient text-[#f4ead6] overflow-hidden text-center"
         >
           {/* Decorative Islamic Background Elements */}
           <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#d4a34b_1px,transparent_1px)] [background-size:20px_20px]" />
@@ -317,32 +438,27 @@ export default function App() {
           <div className="ornate-arch flex-1 flex flex-col items-center justify-center p-6 sm:p-8 my-auto relative z-10 backdrop-blur-[1px]">
             {/* Islamic Crescent & Star Symbol */}
             <div className="mb-3 flex items-center justify-center">
-              <div className="relative">
-                <svg className="w-12 h-12 text-[#e6be6d] drop-shadow-[0_0_12px_rgba(230,190,109,0.5)]" viewBox="0 0 100 100" fill="currentColor">
-                  {/* Crescent */}
-                  <path d="M50 10 A 40 40 0 1 0 90 70 A 32 32 0 1 1 50 10 Z" />
-                  {/* Star */}
-                  <polygon points="68,26 71,34 79,34 73,39 75,47 68,42 61,47 63,39 57,34 65,34" />
-                </svg>
-              </div>
+              <svg className="w-12 h-12 text-[#e6be6d] drop-shadow-[0_0_12px_rgba(230,190,109,0.5)]" viewBox="0 0 100 100" fill="currentColor">
+                <path d="M50 10 A 40 40 0 1 0 90 70 A 32 32 0 1 1 50 10 Z" />
+                <polygon points="68,26 71,34 79,34 73,39 75,47 68,42 61,47 63,39 57,34 65,34" />
+              </svg>
             </div>
 
-            {/* Arabic Calligraphy (Assalamu Alaikum / Bismillah) */}
+            {/* Arabic Calligraphy (Assalamu Alaikum) */}
             <div className="font-arabic text-xl sm:text-2xl text-[#faebb9] tracking-wider mb-1" dir="rtl">
               أَسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ
             </div>
             <div className="text-[11px] tracking-[0.28em] text-[#d4a34b] uppercase font-semibold mb-4">
-              {lang === 'en' ? 'In the Name of Allah, the Most Merciful' : 'അല്ലാഹുവിന്റെ അനുഗ്രഹത്താൽ'}
+              {lang === 'en' ? 'By the Grace & Blessings of Allah' : 'അല്ലാഹുവിന്റെ അനുഗ്രഹത്താൽ'}
             </div>
 
             {/* Rotating Seal Monogram */}
             <div className="relative w-44 h-44 my-2 flex items-center justify-center">
-              {/* Rotating Circular Text SVG */}
               <div className="absolute inset-0 animate-spin-slow">
                 <svg viewBox="0 0 200 200" className="w-full h-full">
-                  <path id="sealPath" d="M100,16 A84,84 0 1,1 99.9,16" fill="none" />
+                  <path id="sealPathMain" d="M100,16 A84,84 0 1,1 99.9,16" fill="none" />
                   <text className="text-[9.5px] uppercase font-bold tracking-[0.24em] fill-[#e6be6d]">
-                    <textPath href="#sealPath" textLength="527">
+                    <textPath href="#sealPathMain" textLength="527">
                       TWO HEARTS ✦ ONE LIFETIME ✦ 23 & 24 DECEMBER 2026 ✦
                     </textPath>
                   </text>
@@ -361,7 +477,7 @@ export default function App() {
             <p className="text-xs uppercase tracking-[0.25em] text-[#e6be6d]/90 font-medium mt-3 mb-2 max-w-[320px] leading-relaxed">
               {lang === 'en'
                 ? 'We cordially invite you to celebrate the wedding ceremony of'
-                : 'ഞങ്ങളുടെ പ്രിയപ്പെട്ട മകൻ വിവാഹിതനാവുന്നു'}
+                : 'ഞങ്ങളുടെ മകൻ വിവാഹിതനാവുന്ന ശുഭവാർത്ത അറിയിക്കുന്നു'}
             </p>
 
             {/* Couple Names */}
@@ -394,17 +510,17 @@ export default function App() {
               </div>
             </div>
 
-            {/* View Original Card Button */}
+            {/* View Printed Card Lightbox Trigger */}
             <button
               onClick={() => setShowModal(true)}
               className="mt-5 inline-flex items-center gap-1.5 text-xs tracking-wider uppercase font-semibold text-[#faebb9] bg-[#143c32]/80 hover:bg-[#1e5245] border border-[#d4a34b] px-4 py-2 rounded-full transition-all hover:scale-105"
             >
               <Camera className="w-3.5 h-3.5 text-[#d4a34b]" />
-              <span>{lang === 'en' ? 'View Printed Card' : 'യഥാർത്ഥ ക്ഷണക്കത്ത് കാണുക'}</span>
+              <span>{lang === 'en' ? 'View Printed Card' : 'അച്ചടിച്ച ക്ഷണക്കത്ത് കാണുക'}</span>
             </button>
           </div>
 
-          {/* Scroll Cue */}
+          {/* Scroll Down Cue */}
           <div className="pt-4 flex flex-col items-center">
             <a href="#families" className="text-[10px] tracking-[0.25em] uppercase text-[#e6be6d]/80 flex flex-col items-center gap-1 hover:text-[#faebb9] transition-colors">
               <span>{lang === 'en' ? 'Scroll to explore' : 'താഴോട്ട് സ്ക്രോൾ ചെയ്യുക'}</span>
@@ -475,7 +591,7 @@ export default function App() {
             <div className="mt-4 pt-3 border-t border-[#143c32]/15 flex items-center justify-center gap-3">
               <a
                 href="tel:9633509129"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0e2b24] text-[#faebb9] text-xs font-semibold hover:bg-[#143c32] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0e2b24] text-[#faebb9] text-xs font-semibold hover:bg-[#143c32] transition-colors"
               >
                 <Phone className="w-3 h-3 text-[#d4a34b]" />
                 <span>9633509129</span>
@@ -484,7 +600,7 @@ export default function App() {
                 href="https://wa.me/919633509129?text=Congratulations%20Ameen%20and%20family%20on%20the%20wedding!"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366] text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#25D366] text-white text-xs font-semibold hover:opacity-90 transition-opacity"
               >
                 <MessageCircle className="w-3 h-3" />
                 <span>WhatsApp</span>
@@ -605,7 +721,6 @@ export default function App() {
 
               {/* Calendar Grid - December 2026 starts on Tuesday (day index 2) */}
               <div className="grid grid-cols-7 gap-1 text-xs">
-                {/* Blank days before Dec 1 (Su, Mo) */}
                 <span className="opacity-0">0</span>
                 <span className="opacity-0">0</span>
                 {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
@@ -641,7 +756,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Add to Calendar Button */}
+            {/* Add to Calendar & Blessings */}
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <button
                 onClick={downloadICS}
@@ -652,7 +767,7 @@ export default function App() {
               </button>
 
               <button
-                onClick={triggerConfetti}
+                onClick={() => handleSendBlessing()}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#143c32] hover:bg-[#1e5245] border border-[#d4a34b]/60 text-[#faebb9] text-xs font-bold uppercase tracking-wider transition-all hover:scale-105"
               >
                 <Sparkles className="w-4 h-4 text-[#d4a34b]" />
@@ -681,7 +796,7 @@ export default function App() {
 
           <p className="text-sm text-[#675442] max-w-[420px] mx-auto mb-6">
             {lang === 'en'
-              ? 'Please join us at our scheduled venues. Tap "Open in Maps" for direct turn-by-turn directions.'
+              ? 'Please join us at our scheduled venues. Tap "Navigate on Google Maps" for turn-by-turn directions.'
               : 'താഴെ പറയുന്ന വേദികളിലേക്ക് താങ്കളെ കുടുംബസമേതം സ്നേഹപൂർവ്വം സ്വാഗതം ചെയ്യുന്നു. മാപ്പിലൂടെ കൃത്യമായ വഴി അറിയാം.'}
           </p>
 
@@ -903,7 +1018,7 @@ export default function App() {
           </p>
 
           {/* Invitation Signed Off by Parents */}
-          <div className="bg-[#f4efe5] border border-[#d4a34b]/40 rounded-2xl p-5 max-w-[400px] mx-auto text-xs text-[#524131] space-y-2 mb-8">
+          <div className="bg-[#f4efe5] border border-[#d4a34b]/40 rounded-2xl p-5 max-w-[400px] mx-auto text-xs text-[#524131] space-y-2 mb-8 shadow-sm">
             <div className="font-semibold text-sm text-[#0e2b24]">
               {lang === 'en' ? 'With warm regards & love:' : 'സ്നേഹപൂർവ്വം:'}
             </div>
@@ -923,7 +1038,7 @@ export default function App() {
           </div>
 
           {/* Share & WhatsApp Call-to-Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
             <button
               onClick={shareDetails}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0e2b24] text-[#faebb9] text-xs font-bold uppercase tracking-wider shadow-md hover:bg-[#143c32] hover:scale-105 transition-all"
@@ -937,42 +1052,115 @@ export default function App() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#25D366] text-white text-xs font-bold uppercase tracking-wider shadow-md hover:opacity-90 hover:scale-105 transition-all"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>{lang === 'en' ? 'WhatsApp' : 'വാട്ട്സ്ആപ്പ്'}</span>
+              <span>{lang === 'en' ? 'Share on WhatsApp' : 'വാട്ട്സ്ആപ്പിൽ അയക്കുക'}</span>
             </button>
           </div>
 
-          {/* View Earlier Invitation Link (As requested: reference to Jasim & Shahala) */}
-          <div className="mt-8 pt-6 border-t border-[#d4a34b]/30">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-[#7d6a52]">
-              <button
-                onClick={() => setShowModal(true)}
-                className="underline hover:text-[#0e2b24] transition-colors font-medium flex items-center gap-1"
+          {/* =========================================================================
+              NEW GRAND ISLAMIC WEDDING BLESSING FINALE (NO REFERENCES)
+             ========================================================================= */}
+          <div className="bg-gradient-to-b from-[#091f1a] to-[#0e2b24] text-[#f4ead6] p-7 sm:p-9 rounded-3xl border border-[#d4a34b]/60 shadow-2xl relative overflow-hidden my-6">
+            {/* Background Halo */}
+            <div className="absolute top-0 right-0 w-36 h-36 bg-[#d4a34b]/10 rounded-full blur-2xl pointer-events-none" />
+
+            {/* Sacred Marriage Du'a Calligraphy */}
+            <div className="font-arabic text-2xl sm:text-3xl text-gold-gradient font-bold leading-relaxed mb-3" dir="rtl">
+              بَارَكَ اللَّهُ لَكُمَا وَبَارَكَ عَلَيْكُمَا وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ
+            </div>
+
+            <div className="font-serif italic text-sm sm:text-base text-[#faebb9] max-w-[420px] mx-auto mb-2">
+              "Bārakallāhu lakumā wa bāraka 'alaykumā wa jama'a baynakumā fī khayr"
+            </div>
+
+            <p className="text-xs text-[#d4a34b] uppercase tracking-widest max-w-[380px] mx-auto leading-relaxed mb-6 font-semibold">
+              {lang === 'en'
+                ? 'May Allah bless you both, shower His blessings upon you, and unite you in goodness and harmony.'
+                : 'അല്ലാഹു നിങ്ങളുടെ ദാമ്പത്യം അനുഗ്രഹിക്കുകയും ഇരുവരിലും നന്മകൾ ഒരുമിച്ചുകൂട്ടുകയും ചെയ്യട്ടെ.'}
+            </p>
+
+            {/* Interactive Du'a Counter & Send Prayers */}
+            <div className="bg-[#143c32]/80 border border-[#d4a34b]/40 rounded-2xl p-4 sm:p-5 max-w-[420px] mx-auto">
+              <div className="flex items-center justify-between text-xs font-bold text-[#faebb9] mb-3">
+                <span className="flex items-center gap-1.5">
+                  <Heart className="w-4 h-4 text-[#ff4d6d] fill-[#ff4d6d]" />
+                  <span>{lang === 'en' ? 'Wedding Blessings' : 'പ്രാർത്ഥനകൾ'}:</span>
+                </span>
+                <span className="bg-[#091f1a] px-3 py-1 rounded-full text-[#faebb9] border border-[#d4a34b]/40">
+                  {blessingCount} {lang === 'en' ? 'Duas' : 'ദുആകൾ'}
+                </span>
+              </div>
+
+              {/* Quick Du'a Pill Buttons */}
+              <div className="flex flex-wrap gap-2 justify-center mb-4">
+                <button
+                  onClick={() => handleSendBlessing(lang === 'en' ? 'Barakallahu Lakuma! 🤲' : 'ബാരകല്ലാഹു ലക്കുമ! 🤲')}
+                  className="px-3 py-1.5 rounded-full bg-[#091f1a] hover:bg-[#d4a34b] hover:text-[#091f1a] border border-[#d4a34b]/50 text-[11px] font-medium text-[#faebb9] transition-all"
+                >
+                  🤲 Barakallahu Lakuma
+                </button>
+                <button
+                  onClick={() => handleSendBlessing(lang === 'en' ? 'Mubarak to Ameen & Farseena! 🎉' : 'അമീനും ഫർസീനക്കും ആശംസകൾ! 🎉')}
+                  className="px-3 py-1.5 rounded-full bg-[#091f1a] hover:bg-[#d4a34b] hover:text-[#091f1a] border border-[#d4a34b]/50 text-[11px] font-medium text-[#faebb9] transition-all"
+                >
+                  💍 Mubarak!
+                </button>
+                <button
+                  onClick={() => handleSendBlessing(lang === 'en' ? 'May Allah bless your home with peace & joy! 🏡' : 'സന്തോഷകരമായ കുടുംബജീവിതം ആശംസിക്കുന്നു! 🏡')}
+                  className="px-3 py-1.5 rounded-full bg-[#091f1a] hover:bg-[#d4a34b] hover:text-[#091f1a] border border-[#d4a34b]/50 text-[11px] font-medium text-[#faebb9] transition-all"
+                >
+                  ❤️ Happy Married Life
+                </button>
+              </div>
+
+              {/* Custom Du'a Input */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (userDua.trim()) handleSendBlessing(userDua.trim());
+                }}
+                className="flex items-center gap-2"
               >
-                <Camera className="w-3.5 h-3.5 text-[#d4a34b]" />
-                <span>{lang === 'en' ? 'View Printed Card' : 'യഥാർത്ഥ കാർഡ് കാണുക'}</span>
-              </button>
-              <span className="hidden sm:inline">•</span>
-              <a
-                href="https://jasim-weds-shahala.netlify.app"
-                target="_blank"
-                rel="noreferrer"
-                className="underline hover:text-[#0e2b24] transition-colors flex items-center gap-1"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-[#d4a34b]" />
-                <span>{lang === 'en' ? 'View Reference Design (Jasim & Shahala)' : 'റെഫറൻസ് ഇൻവിറ്റേഷൻ (ജാസിം & ഷഹല)'}</span>
-              </a>
+                <input
+                  type="text"
+                  value={userDua}
+                  onChange={(e) => setUserDua(e.target.value)}
+                  placeholder={lang === 'en' ? 'Type your heartfelt prayer...' : 'നിങ്ങളുടെ പ്രാർത്ഥന ഇവിടെ ടൈപ്പ് ചെയ്യുക...'}
+                  className="flex-1 bg-[#091f1a] border border-[#d4a34b]/50 rounded-full px-4 py-2 text-xs text-[#faebb9] placeholder-[#e6be6d]/50 focus:outline-none focus:border-[#faebb9]"
+                />
+                <button
+                  type="submit"
+                  className="w-9 h-9 rounded-full bg-[#d4a34b] hover:bg-[#faebb9] text-[#091f1a] flex items-center justify-center flex-shrink-0 shadow transition-colors"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+
+              {/* Recent Blessings Feed */}
+              {submittedDuas.length > 0 && (
+                <div className="mt-4 pt-3 border-t border-[#d4a34b]/20 space-y-2 text-left">
+                  {submittedDuas.slice(0, 3).map((d, idx) => (
+                    <div key={idx} className="bg-[#091f1a]/60 rounded-lg p-2.5 text-[11px]">
+                      <div className="flex justify-between font-semibold text-[#d4a34b] text-[10px] mb-0.5">
+                        <span>{d.name}</span>
+                        <span className="opacity-70">{d.time}</span>
+                      </div>
+                      <div className="text-[#f4ead6]/90">{d.text}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Footer note */}
-          <div className="mt-8 text-[10px] tracking-[0.25em] uppercase text-[#7d6a52]">
+          <div className="mt-8 text-[11px] tracking-[0.25em] uppercase text-[#7d6a52]">
             Muhammed Ameen &amp; Farseena<br />
             23 · 24 · December · 2026
           </div>
         </section>
       </main>
 
-      {/* LIGHTBOX MODAL: ORIGINAL WEDDING CARD IMAGE */}
+      {/* LIGHTBOX MODAL: ORIGINAL PRINTED WEDDING CARD */}
       {showModal && (
         <div
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
